@@ -44,6 +44,7 @@ func serverRun(cmd *cobra.Command, args []string) {
 	r.GET("/", homeRoute)
 	r.GET("/static/*filepath", staticServe)
 	r.GET("/channel/*key", channelRoute)
+	r.GET("/post/*key", postRoute)
 
 	port := viper.GetString("port")
 	fmt.Println("Running on port:", port)
@@ -108,6 +109,34 @@ func channelRoute(c *gin.Context) {
 	}
 
 	obj := gin.H{"title": currentChannel.Title, "header": currentChannel.Title, "posts": posts, "channels": AllChannels()}
+
+	c.HTML(200, "full.html", obj)
+}
+
+func postRoute(c *gin.Context) {
+	key := c.Params.ByName("key")
+
+	if len(key) < 2 {
+		four04(c, "Invalid Post")
+		return
+	}
+
+	key = key[1:]
+
+	var ps []Itm
+	r := Items().Find(bson.M{"key": key}).Sort("-date").Limit(1)
+	r.All(&ps)
+
+	if len(ps) == 0 {
+		four04(c, "Post not found")
+		return
+	}
+
+	var posts []Itm
+	results := Items().Find(bson.M{"date": bson.M{"$lte": ps[0].Date}}).Sort("-date").Limit(20)
+	results.All(&posts)
+
+	obj := gin.H{"title": ps[0].Title, "posts": posts, "channels": AllChannels()}
 
 	c.HTML(200, "full.html", obj)
 }
