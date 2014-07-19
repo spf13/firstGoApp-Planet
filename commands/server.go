@@ -43,10 +43,15 @@ func serverRun(cmd *cobra.Command, args []string) {
 
 	r.GET("/", homeRoute)
 	r.GET("/static/*filepath", staticServe)
+	r.GET("/channel/*key", channelRoute)
 
 	port := viper.GetString("port")
 	fmt.Println("Running on port:", port)
 	r.Run(":" + port)
+}
+
+func four04(c *gin.Context, message string) {
+	c.HTML(404, "full.html", gin.H{"message": message, "title": message})
 }
 
 func homeRoute(c *gin.Context) {
@@ -54,7 +59,7 @@ func homeRoute(c *gin.Context) {
 	results := Items().Find(bson.M{}).Sort("-date").Limit(20)
 	results.All(&posts)
 
-	obj := gin.H{"title": "Go Rules", "posts": posts}
+	obj := gin.H{"title": "Go Rules", "posts": posts, "channels": AllChannels()}
 	c.HTML(200, "full.html", obj)
 }
 
@@ -69,6 +74,42 @@ func staticServe(c *gin.Context) {
 	fmt.Println(c.Params.ByName("filepath"))
 	http.FileServer(static.HTTPBox()).ServeHTTP(c.Writer, c.Req)
 	c.Req.URL.Path = original
+}
+
+func channelRoute(c *gin.Context) {
+	key := c.Params.ByName("key")
+	if len(key) < 2 {
+		four04(c, "Channel Not Found")
+		return
+	}
+
+	key = key[1:]
+
+	fmt.Println(key)
+
+	var posts []Itm
+	results := Items().Find(bson.M{"channelkey": key}).Sort("-date").Limit(20)
+	results.All(&posts)
+
+	if len(posts) == 0 {
+		four04(c, "No Articles")
+		return
+	}
+
+	var currentChannel Chnl
+	err := Channels().Find(bson.M{"key": key}).One(&currentChannel)
+	if err != nil {
+		if string(err.Error()) == "not found" {
+			four04(c, "Channel not found")
+			return
+		} else {
+			fmt.Println(err)
+		}
+	}
+
+	obj := gin.H{"title": currentChannel.Title, "header": currentChannel.Title, "posts": posts, "channels": AllChannels()}
+
+	c.HTML(200, "full.html", obj)
 }
 
 func loadTemplates(list ...string) *template.Template {

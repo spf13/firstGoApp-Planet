@@ -50,36 +50,17 @@
             {{ end }}
         </section>
         <section id="channel-list" class="ui large inverted vertical menu tab" data-tab="channels">
-                <div class="item js-navigate-channel" data-href='http://www.example.com' style="cursor:pointer;">
-                    <a href="" class="ui float right"><i class="external url sign icon"></i></a>
-                    <a class="ui name" href=""> Hacking Management </a>
-                    <span class="ui label">13</span>
+                <a class="item js-navigate" href="/" >
+                    <i class="external home icon"></i>
+                    <span class="ui name" href=""> All </span>
+                </a>
+                {{ range $channel := .channels }}
+                <div class="item js-navigate-channel" data-href="/channel/{{$channel.Key}}" data-key="{{$channel.Key}}" style="cursor:pointer;">
+                    <a href="{{$channel.HomePage}}" class="ui float right"><i class="external url sign icon"></i></a>
+                    <span class="ui name" href=""> {{$channel.Title}} </span>
+                    <span class="ui label">{{ len $channel.Links }}</span>
                 </div>
-                <div class="item js-navigate-channel" data-href='http://www.example.com' style="cursor:pointer;">
-                    <span href="" class="ui float right"><i class="external url sign icon"></i></a>
-                    <span class="ui name" href=""> Going Go </span>
-                    <span class="ui label">11</span>
-                </div>
-                <div class="item js-navigate-channel" style="cursor:pointer;">
-                    <span href="" class="ui float right"><i class="external url sign icon"></i></a>
-                    <span class="ui name" href=""> Hacking Management </span>
-                    <span class="ui label">13</span>
-                </div>
-                <div class="item js-navigate-channel" style="cursor:pointer;">
-                    <span href="" class="ui float right"><i class="external url sign icon"></i></a>
-                    <span class="ui name" href=""> Going Go </span>
-                    <span class="ui label">11</span>
-                </div>
-                <div class="item js-navigate-channel" style="cursor:pointer;">
-                    <a href="" class="ui float right"><i class="external url sign icon"></i></a>
-                    <span class="ui name" href=""> Hacking Management </span>
-                    <span class="ui label">13</span>
-                </div>
-                <div class="item js-navigate-channel" style="cursor:pointer;">
-                    <a href="" class="ui float right"><i class="external url sign icon"></i></a>
-                    <span class="ui name" href=""> Going Go </span>
-                    <span class="ui label">11</span>
-                </div>
+                {{end}}
         </section>
         <footer>{{ with .footer }}{{.|html}}{{else}}Powered by <a href="http://github.com/spf13/dagobah">Dagobah</a>{{ end }}</footer>
     </nav>
