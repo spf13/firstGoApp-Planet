@@ -7,14 +7,17 @@ package commands
 
 import (
 	"fmt"
+	"html"
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var serverCmd = &cobra.Command{
@@ -47,7 +50,11 @@ func serverRun(cmd *cobra.Command, args []string) {
 }
 
 func homeRoute(c *gin.Context) {
-	obj := gin.H{"title": "Go Rules"}
+	var posts []Itm
+	results := Items().Find(bson.M{}).Sort("-date").Limit(20)
+	results.All(&posts)
+
+	obj := gin.H{"title": "Go Rules", "posts": posts}
 	c.HTML(200, "full.html", obj)
 }
 
@@ -85,5 +92,19 @@ func loadTemplates(list ...string) *template.Template {
 		}
 	}
 
+	funcMap := template.FuncMap{
+		"html":  ProperHtml,
+		"title": func(a string) string { return strings.Title(a) },
+	}
+
+	templates.Funcs(funcMap)
+
 	return templates
+}
+
+func ProperHtml(text string) template.HTML {
+	if strings.Contains(text, "content:encoded>") || strings.Contains(text, "content/:encoded>") {
+		text = html.UnescapeString(text)
+	}
+	return template.HTML(html.UnescapeString(template.HTMLEscapeString(text)))
 }

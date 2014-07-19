@@ -7,6 +7,8 @@ package commands
 
 import (
 	"fmt"
+	"log"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -211,4 +213,18 @@ func chnlify(o *rss.Channel) Chnl {
 	x.ItemKeys = keys
 
 	return x
+}
+
+func (i Itm) FirstLink() (link rss.Link) {
+	if len(i.Links) == 0 || i.Links[0] == nil {
+		return
+	}
+	return *i.Links[0]
+}
+
+func (i Itm) WorthShowing() bool {
+	if len(i.FullContent) > 100 {
+		return true
+	}
+	return false
 }
