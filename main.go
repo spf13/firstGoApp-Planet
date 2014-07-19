@@ -5,7 +5,7 @@
 
 package main
 
-import "github.com/spf13/dagobah/commands"
+import "github.com/spf13/firstGoApp-Planet/commands"
 
 func main() {
 	commands.Execute()
