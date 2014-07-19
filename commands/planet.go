@@ -47,6 +47,7 @@ func rootRun(cmd *cobra.Command, args []string) {
 
 func addCommands() {
 	RootCmd.AddCommand(fetchCmd)
+	RootCmd.AddCommand(serverCmd)
 }
 
 func Execute() {
