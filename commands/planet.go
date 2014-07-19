@@ -45,7 +45,13 @@ func rootRun(cmd *cobra.Command, args []string) {
 	fmt.Println(viper.GetString("appname"))
 }
 
+func addCommands() {
+	RootCmd.AddCommand(fetchCmd)
+}
+
 func Execute() {
+	addCommands()
+
 	err := RootCmd.Execute()
 	if err != nil {
 		fmt.Println(err)
