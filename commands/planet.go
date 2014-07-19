@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 //var Config *hugolib.Config
@@ -19,9 +20,29 @@ var RootCmd = &cobra.Command{
 	Long: `Dagobah provides planet style RSS aggregation. It
 is inspired by python planet. It has a simple YAML configuration
 and provides it's own webserver.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Dagobah runs")
-	},
+	Run: rootRun,
+}
+
+var CfgFile string
+
+func init() {
+	cobra.OnInitialize(initConfig)
+	RootCmd.PersistentFlags().StringVar(&CfgFile, "config", "", "config file (default is $HOME/dagobah/config.yaml)")
+}
+
+func initConfig() {
+	if CfgFile != "" {
+		viper.SetConfigFile(CfgFile)
+	}
+	viper.SetConfigName("config")
+	viper.AddConfigPath("/etc/dagobah/")
+	viper.AddConfigPath("$HOME/.dagobah/")
+	viper.ReadInConfig()
+}
+
+func rootRun(cmd *cobra.Command, args []string) {
+	fmt.Println(viper.Get("feeds"))
+	fmt.Println(viper.GetString("appname"))
 }
 
 func Execute() {
