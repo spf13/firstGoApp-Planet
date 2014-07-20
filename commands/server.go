@@ -35,7 +35,7 @@ func init() {
 func serverRun(cmd *cobra.Command, args []string) {
 	r := gin.Default()
 	templates := loadTemplates("full.html")
-	r.HTMLTemplates = templates
+	r.SetHTMLTemplate(templates)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
@@ -64,11 +64,11 @@ func staticServe(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	original := c.Req.URL.Path
-	c.Req.URL.Path = c.Params.ByName("filepath")
+	original := c.Request.URL.Path
+	c.Request.URL.Path = c.Params.ByName("filepath")
 	fmt.Println(c.Params.ByName("filepath"))
-	http.FileServer(static.HTTPBox()).ServeHTTP(c.Writer, c.Req)
-	c.Req.URL.Path = original
+	http.FileServer(static.HTTPBox()).ServeHTTP(c.Writer, c.Request)
+	c.Request.URL.Path = original
 }
 
 func loadTemplates(list ...string) *template.Template {
